@@ -64,11 +64,11 @@
 
   <profiles>
    <profile>
-    <id>linux</id>
+    <id>windows</id>
     <activation>
       <os> 
-        <family>unix</family> 
-        <name>Linux</name>
+        <family>windows</family> 
+        <!--name>Windows 10</name-->
       </os>
     </activation>
     <build>
