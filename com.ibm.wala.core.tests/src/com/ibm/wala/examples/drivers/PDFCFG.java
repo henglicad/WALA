@@ -53,7 +53,8 @@ import com.ibm.wala.ipa.cfg.InterproceduralCFG;
 public class PDFCFG {
 
   private final static boolean CHECK_GRAPH = false;
-  private final static String PDF_FILE = "cfg.pdf";
+  private final static String PDF_FILE_CG = "cg.pdf";
+  private final static String PDF_FILE_CFG = "cfg.pdf";
 
   /**
    * Usage: SWTCallGraph -appJar [jar file name]
@@ -72,9 +73,9 @@ public class PDFCFG {
     PDFCallGraph.validateCommandLine(p);
     //run(p);
     CallGraph cg = buildCallGraph(p);
-    //visualizeCallGraph(cg);
+    visualizeCallGraph(cg);
     AbstractInterproceduralCFG cfg = new InterproceduralCFG(cg);
-    
+    visualizeControlFlowGraph(cfg);
   }
 
   /**
@@ -178,10 +179,37 @@ public class PDFCFG {
         e.printStackTrace();
         Assertions.UNREACHABLE();
       }
-      String pdfFile = p.getProperty(WalaProperties.OUTPUT_DIR) + File.separatorChar + PDF_FILE;
+      String pdfFile = p.getProperty(WalaProperties.OUTPUT_DIR) + File.separatorChar + PDF_FILE_CG;
 
       String dotExe = p.getProperty(WalaExamplesProperties.DOT_EXE);
-      DotUtil.dotify(cg, null, PDFTypeHierarchy.DOT_FILE, pdfFile, dotExe);
+      String dotFile = p.getProperty(WalaProperties.OUTPUT_DIR) + File.separatorChar + "_cg_"
+          + PDFTypeHierarchy.DOT_FILE;
+      DotUtil.dotify(cg, null, dotFile, pdfFile, dotExe);
+
+      String gvExe = p.getProperty(WalaExamplesProperties.PDFVIEW_EXE);
+      return PDFViewUtil.launchPDFView(pdfFile, gvExe);
+    } catch (WalaException e) {
+      e.printStackTrace();
+      return null;
+    }
+  }
+  
+  public static Process visualizeControlFlowGraph(AbstractInterproceduralCFG cfg) {
+    try {
+      Properties p = null;
+      try {
+        p = WalaExamplesProperties.loadProperties();
+        p.putAll(WalaProperties.loadProperties());
+      } catch (WalaException e) {
+        e.printStackTrace();
+        Assertions.UNREACHABLE();
+      }
+      String pdfFile = p.getProperty(WalaProperties.OUTPUT_DIR) + File.separatorChar + PDF_FILE_CFG;
+
+      String dotExe = p.getProperty(WalaExamplesProperties.DOT_EXE);
+      String dotFile = p.getProperty(WalaProperties.OUTPUT_DIR) + File.separatorChar + "_cfg_"
+          + PDFTypeHierarchy.DOT_FILE;
+      DotUtil.dotify(cfg, null, dotFile, pdfFile, dotExe);
 
       String gvExe = p.getProperty(WalaExamplesProperties.PDFVIEW_EXE);
       return PDFViewUtil.launchPDFView(pdfFile, gvExe);
