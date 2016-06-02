@@ -75,6 +75,7 @@ public class PDFCFG {
     CallGraph cg = buildCallGraph(p);
     visualizeCallGraph(cg);
     AbstractInterproceduralCFG cfg = new InterproceduralCFG(cg);
+    cfg.printBasicBlocks();
     visualizeControlFlowGraph(cfg);
   }
 
@@ -217,13 +218,13 @@ public class PDFCFG {
       String dotExe = p.getProperty(WalaExamplesProperties.DOT_EXE);
       String dotFile = p.getProperty(WalaProperties.OUTPUT_DIR) + File.separatorChar + "_cfg_"
           + PDFTypeHierarchy.DOT_FILE;
-      //DotUtil.dotify(cfg, null, dotFile, pdfFile, dotExe);
-      DotUtil.dotify(cfg, null, dotFile, pdfFile, null);
-      /*
+      DotUtil.dotify(cfg, null, dotFile, pdfFile, dotExe);
+      //DotUtil.dotify(cfg, null, dotFile, pdfFile, null);
+      
       String gvExe = p.getProperty(WalaExamplesProperties.PDFVIEW_EXE);
       return PDFViewUtil.launchPDFView(pdfFile, gvExe);
-      */
-      return null;
+      
+      //return null;
     } catch (WalaException e) {
       e.printStackTrace();
       return null;

@@ -10,6 +10,11 @@
  *******************************************************************************/
 package com.ibm.wala.ipa.cfg;
 
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -460,6 +465,20 @@ public abstract class AbstractInterproceduralCFG<T extends ISSABasicBlock> imple
     }
   }
 
+  public void printBasicBlocks() {
+    try (Writer writer = new BufferedWriter(new OutputStreamWriter(
+        new FileOutputStream("basicBlocks.txt"), "utf-8"))) {
+      for (int i = 0; i < g.getMaxNumber(); i++) {
+        BasicBlockInContext<T> bb = getNode(i);
+        writer.write("bb number: " + i + "\n");
+        writer.write(bb.toString() + "\n");
+        
+      } 
+    } catch (IOException ex){
+      System.out.println("Cannot write to file baslicBlocks.txt");
+    }
+  }
+  
   /**
    * add interprocedural edges to nodes in callees of n
    * 
