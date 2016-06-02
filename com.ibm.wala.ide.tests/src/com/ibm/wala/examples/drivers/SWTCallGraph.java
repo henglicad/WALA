@@ -92,9 +92,13 @@ public class SWTCallGraph {
 
       String exclusionFile = p.getProperty("exclusions");
 
-      AnalysisScope scope = AnalysisScopeReader.makeJavaBinaryAnalysisScope(appJar, exclusionFile != null ? new File(exclusionFile)
-          : (new FileProvider()).getFile(CallGraphTestUtil.REGRESSION_EXCLUSIONS));
-
+      String scopeFile = p.getProperty("scopeFile");
+      
+      //AnalysisScope scope = AnalysisScopeReader.makeJavaBinaryAnalysisScope(appJar, exclusionFile != null ? new File(exclusionFile)
+      //    : (new FileProvider()).getFile(CallGraphTestUtil.REGRESSION_EXCLUSIONS));
+      AnalysisScope scope = AnalysisScopeReader.readJavaScope(scopeFile, exclusionFile != null ? new File(exclusionFile)
+          : (new FileProvider()).getFile(CallGraphTestUtil.REGRESSION_EXCLUSIONS), SWTCallGraph.class.getClassLoader());
+      
       ClassHierarchy cha = ClassHierarchy.make(scope);
 
       Iterable<Entrypoint> entrypoints = null;

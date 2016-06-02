@@ -103,8 +103,13 @@ public class PDFCFG {
 
       String exclusionFile = p.getProperty("exclusions");
 
-      AnalysisScope scope = AnalysisScopeReader.makeJavaBinaryAnalysisScope(appJar, exclusionFile != null ? new File(exclusionFile)
-          : (new FileProvider()).getFile(CallGraphTestUtil.REGRESSION_EXCLUSIONS));
+      String scopeFile = p.getProperty("scopeFile");
+      
+      //AnalysisScope scope = AnalysisScopeReader.makeJavaBinaryAnalysisScope(appJar, exclusionFile != null ? new File(exclusionFile)
+      //    : (new FileProvider()).getFile(CallGraphTestUtil.REGRESSION_EXCLUSIONS));
+      
+      AnalysisScope scope = AnalysisScopeReader.readJavaScope(scopeFile, exclusionFile != null ? new File(exclusionFile)
+          : (new FileProvider()).getFile(CallGraphTestUtil.REGRESSION_EXCLUSIONS),PDFCFG.class.getClassLoader());
 
       ClassHierarchy cha = ClassHierarchy.make(scope);
 
@@ -184,10 +189,13 @@ public class PDFCFG {
       String dotExe = p.getProperty(WalaExamplesProperties.DOT_EXE);
       String dotFile = p.getProperty(WalaProperties.OUTPUT_DIR) + File.separatorChar + "_cg_"
           + PDFTypeHierarchy.DOT_FILE;
-      DotUtil.dotify(cg, null, dotFile, pdfFile, dotExe);
-
+      //DotUtil.dotify(cg, null, dotFile, pdfFile, dotExe);
+      DotUtil.dotify(cg, null, dotFile, pdfFile, null);
+      /*
       String gvExe = p.getProperty(WalaExamplesProperties.PDFVIEW_EXE);
       return PDFViewUtil.launchPDFView(pdfFile, gvExe);
+      */
+      return null;
     } catch (WalaException e) {
       e.printStackTrace();
       return null;
@@ -209,10 +217,13 @@ public class PDFCFG {
       String dotExe = p.getProperty(WalaExamplesProperties.DOT_EXE);
       String dotFile = p.getProperty(WalaProperties.OUTPUT_DIR) + File.separatorChar + "_cfg_"
           + PDFTypeHierarchy.DOT_FILE;
-      DotUtil.dotify(cfg, null, dotFile, pdfFile, dotExe);
-
+      //DotUtil.dotify(cfg, null, dotFile, pdfFile, dotExe);
+      DotUtil.dotify(cfg, null, dotFile, pdfFile, null);
+      /*
       String gvExe = p.getProperty(WalaExamplesProperties.PDFVIEW_EXE);
       return PDFViewUtil.launchPDFView(pdfFile, gvExe);
+      */
+      return null;
     } catch (WalaException e) {
       e.printStackTrace();
       return null;

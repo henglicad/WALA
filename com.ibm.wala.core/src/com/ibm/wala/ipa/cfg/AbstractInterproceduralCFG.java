@@ -34,6 +34,7 @@ import com.ibm.wala.util.intset.BitVector;
 import com.ibm.wala.util.intset.BitVectorIntSet;
 import com.ibm.wala.util.intset.IntSet;
 import com.ibm.wala.util.intset.MutableIntSet;
+import com.ibm.wala.types.ClassLoaderReference;
 
 /**
  * Interprocedural control-flow graph, constructed lazily.
@@ -430,6 +431,24 @@ public abstract class AbstractInterproceduralCFG<T extends ISSABasicBlock> imple
   private void constructFullGraph() {
     if (!constructedFullGraph) {
       for (CGNode n : cg) {
+        
+        // Heng added code, begin ***************************************
+        // Get ClassLoaderReference string 
+        // (Could be "Application classloader", "Extension classloader", or "Primordial classloader")
+        ClassLoaderReference clr = n.getMethod().getDeclaringClass().getClassLoader().getReference();
+        String clr_str = clr.toString();
+        /*
+        System.out.println("***************************");
+        System.out.println("Class name: " + n.getMethod().getDeclaringClass().toString());
+        System.out.println("Method name: " + n.getMethod().toString());
+        System.out.println("ClassLoaderReference: " + clr_str);
+        System.out.println("***************************");       
+        */
+        if (!clr_str.contains("Application"))
+          continue; // only consider application code (i.e., excluding Java language code and other libraries)
+        System.out.println("Method name: " + n.getMethod().toString());
+        // Heng added code, end ***************************************
+        
         addIntraproceduralNodesAndEdgesForCGNodeIfNeeded(n);
         addEdgesToCallees(n);
       }
@@ -500,6 +519,13 @@ public abstract class AbstractInterproceduralCFG<T extends ISSABasicBlock> imple
           irrelevantTargets = true;
           continue;
         }
+        
+        // Heng added code, begin ***************************************
+        ClassLoaderReference clr = tn.getMethod().getDeclaringClass().getClassLoader().getReference();
+        String clr_str = clr.toString();
+        if (!clr_str.contains("Application"))
+          continue;
+        // Heng added code, end ***************************************
 
         if (DEBUG_LEVEL > 1) {
           System.err.println("Relevant target: " + tn);
