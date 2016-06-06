@@ -56,7 +56,8 @@ public abstract class AbstractInterproceduralCFG<T extends ISSABasicBlock> imple
    * Should the graph include call-to-return edges? When set to <code>false</code>, the graphs output by {@link IFDSExplorer} look
    * incorrect
    */
-  private final static boolean CALL_TO_RETURN_EDGES = true;
+  //private final static boolean CALL_TO_RETURN_EDGES = true;
+  private final static boolean CALL_TO_RETURN_EDGES = false;
 
   /**
    * Graph implementation we delegate to.
@@ -213,6 +214,32 @@ public abstract class AbstractInterproceduralCFG<T extends ISSABasicBlock> imple
           BasicBlockInContext<T> b = new BasicBlockInContext<T>(n, bb);
           g.addEdge(p, b);
         }
+        
+        // Heng - added, add a edge from a method invocation to its successor,
+        // if the invoked method is out of the analysis scope, 
+        // begin ***************
+        //ControlFlowGraph<SSAInstruction, T> cfg = getCFG(n);
+        CallSiteReference site = getCallSiteForCallBlock(pb, (ControlFlowGraph<SSAInstruction, T>)cfg);
+        if (DEBUG_LEVEL > 1) {
+          System.err.println("got Site: " + site);
+        }
+        boolean outOfScopeInvoke = true;
+        for (Iterator ts = cg.getPossibleTargets(n, site).iterator(); ts.hasNext();) {
+          CGNode tn = (CGNode) ts.next();
+          ClassLoaderReference clr = tn.getMethod().getDeclaringClass().getClassLoader().getReference();
+          String clr_str = clr.toString();
+          if (clr_str.contains("Application") && relevant.test(tn)) {
+            outOfScopeInvoke = false;
+          }
+        }
+        if (outOfScopeInvoke) {
+       // Add a "normal" edge from the predecessor block to this block.
+          BasicBlockInContext<T> p = new BasicBlockInContext<T>(n, pb);
+          BasicBlockInContext<T> b = new BasicBlockInContext<T>(n, bb);
+          g.addEdge(p, b);
+        }
+        // Heng - added, end   ***************
+        
       } else {
         // previous instruction is not a call instruction.
         BasicBlockInContext<T> p = new BasicBlockInContext<T>(n, pb);
@@ -465,13 +492,67 @@ public abstract class AbstractInterproceduralCFG<T extends ISSABasicBlock> imple
     }
   }
 
+  /**
+   * Heng -  added the method
+   * print the basic blocks of a control flow graph: nodes and their instructions
+   */
   public void printBasicBlocks() {
+    constructFullGraph();
     try (Writer writer = new BufferedWriter(new OutputStreamWriter(
         new FileOutputStream("basicBlocks.txt"), "utf-8"))) {
-      for (int i = 0; i < g.getMaxNumber(); i++) {
-        BasicBlockInContext<T> bb = getNode(i);
-        writer.write("bb number: " + i + "\n");
+      //writer.write("getMaxNumber() == " + g.getMaxNumber());
+      writer.write("getNumberOfNodes() == " + g.getNumberOfNodes() + "\n");
+      //for (int i = 0; i <= g.getMaxNumber(); i++) {
+      for (Iterator<BasicBlockInContext<T>> bbs = this.iterator(); bbs.hasNext();) {
+        //BasicBlockInContext<T> bb = getNode(i);
+        BasicBlockInContext<T> bb = bbs.next();
+        //writer.write("bb number: " + i + "\n");
         writer.write(bb.toString() + "\n");
+        
+        ControlFlowGraph<SSAInstruction, T> cfg = getCFG(bb);
+        SSAInstruction[] statements = cfg.getInstructions();
+        
+        /*
+        writer.write("Instructions of the cfg: " + "\n");
+        for (SSAInstruction stmt:statements) {
+          if (stmt != null) {
+            writer.write(stmt.toString() + "\n");
+          }
+        }
+        */
+        
+        int firstIndex = bb.getFirstInstructionIndex();
+        int lastIndex =bb.getLastInstructionIndex();
+        
+        //writer.write("firstIndex " + firstIndex + "\n" );
+        //writer.write("lastIndex " + lastIndex + "\n");
+        
+        //writer.write("isEntryBlock: " + bb.isEntryBlock() + "\t");
+        //writer.write("isExitBlock: " + bb.isExitBlock() + "\t");
+        //writer.write("isCatchBlock: " + bb.isCatchBlock() + "\n");
+        
+        for (int currIndex = firstIndex; currIndex >=0 && currIndex <= lastIndex; currIndex ++) {
+          //writer.write("currIndex: " + currIndex + ";" + "instruction number: " + statements.length + "\n");
+          SSAInstruction currInstr = statements[currIndex];
+          if (currInstr != null) {
+            writer.write("***" + currInstr.toString() + "\n");
+          }
+        }
+        
+        /*
+        if (lastIndex >= 0) {
+
+          if (statements.length <= lastIndex) {
+            System.err.println(statements.length);
+            System.err.println(cfg);
+            assert lastIndex < statements.length : "bad BB " + B + " and CFG for " + getCGNode(B);
+          }
+          SSAInstruction last = statements[lastIndex];
+          return (last instanceof SSAAbstractInvokeInstruction);
+        } else {
+          return false;
+        }
+        */        
         
       } 
     } catch (IOException ex){
@@ -542,8 +623,19 @@ public abstract class AbstractInterproceduralCFG<T extends ISSABasicBlock> imple
         // Heng added code, begin ***************************************
         ClassLoaderReference clr = tn.getMethod().getDeclaringClass().getClassLoader().getReference();
         String clr_str = clr.toString();
-        if (!clr_str.contains("Application"))
+        if (!clr_str.contains("Application")) {
+          /*
+          final T cbDelegate = callBlock.getDelegate();
+          for (Iterator<? extends T> returnBlocks = cfg.getSuccNodes(cbDelegate); returnBlocks.hasNext();) {
+            T retBlock = returnBlocks.next();
+            if (irrelevantTargets) {
+              // Add a "normal" edge from the call block to the return block.
+              g.addEdge(callBlock, new BasicBlockInContext<T>(n, retBlock));
+            }
+          }
+          */
           continue;
+        }
         // Heng added code, end ***************************************
 
         if (DEBUG_LEVEL > 1) {

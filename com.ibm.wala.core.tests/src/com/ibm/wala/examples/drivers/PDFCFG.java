@@ -42,6 +42,7 @@ import com.ibm.wala.viz.DotUtil;
 import com.ibm.wala.viz.PDFViewUtil;
 import com.ibm.wala.ipa.cfg.AbstractInterproceduralCFG;
 import com.ibm.wala.ipa.cfg.InterproceduralCFG;
+import com.ibm.wala.ipa.cfg.InterproceduralCFGExceptionPruned;
 
 /**
  * 
@@ -74,7 +75,8 @@ public class PDFCFG {
     //run(p);
     CallGraph cg = buildCallGraph(p);
     visualizeCallGraph(cg);
-    AbstractInterproceduralCFG cfg = new InterproceduralCFG(cg);
+    //AbstractInterproceduralCFG cfg = new InterproceduralCFG(cg);
+    AbstractInterproceduralCFG cfg = new InterproceduralCFGExceptionPruned(cg);
     cfg.printBasicBlocks();
     visualizeControlFlowGraph(cfg);
   }
@@ -105,10 +107,10 @@ public class PDFCFG {
       String exclusionFile = p.getProperty("exclusions");
 
       String scopeFile = p.getProperty("scopeFile");
-      
+
       //AnalysisScope scope = AnalysisScopeReader.makeJavaBinaryAnalysisScope(appJar, exclusionFile != null ? new File(exclusionFile)
       //    : (new FileProvider()).getFile(CallGraphTestUtil.REGRESSION_EXCLUSIONS));
-      
+
       AnalysisScope scope = AnalysisScopeReader.readJavaScope(scopeFile, exclusionFile != null ? new File(exclusionFile)
           : (new FileProvider()).getFile(CallGraphTestUtil.REGRESSION_EXCLUSIONS),PDFCFG.class.getClassLoader());
 
