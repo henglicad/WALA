@@ -488,10 +488,43 @@ public abstract class AbstractInterproceduralCFG<T extends ISSABasicBlock> imple
         addedSuccs.add(i);
         addedPreds.add(i);
       }
+      
       constructedFullGraph = true;
+
+      // Heng - added: detect logging info of each basic block
+      detectLoggingInfoForBasicBlocks();
     }
   }
 
+  /**
+   * Heng - added method
+   * check each basic block and find whether it is logged or not 
+   */
+  public void detectLoggingInfoForBasicBlocks() {
+    for (Iterator<BasicBlockInContext<T>> bbs = this.iterator(); bbs.hasNext();) {
+      BasicBlockInContext<T> bb = bbs.next();
+      if (hasCall(bb)) {
+        ControlFlowGraph<SSAInstruction, T> cfg = getCFG(bb);
+        CallSiteReference site = getCallSiteForCallBlock(bb, cfg);
+        String targetMethodStr = site.getDeclaredTarget().toString();
+        System.out.println("targetMethod: " + targetMethodStr);
+        String[] subStrs = targetMethodStr.split(",");
+        System.out.println(java.util.Arrays.toString(subStrs));
+        if (subStrs[1].contains("/Logger") &&
+            (subStrs[2].contains("trace(") ||
+                subStrs[2].contains("debug(") ||
+                subStrs[2].contains("info(") ||
+                subStrs[2].contains("warn(") ||
+                subStrs[2].contains("error(") ||
+                subStrs[2].contains("fatal(") 
+                )) {
+          bb.setIsLogged(true);
+        }
+        
+      }
+    }
+  }
+  
   /**
    * Heng -  added the method
    * print the basic blocks of a control flow graph: nodes and their instructions
@@ -538,22 +571,9 @@ public abstract class AbstractInterproceduralCFG<T extends ISSABasicBlock> imple
             writer.write("***" + currInstr.toString() + "\n");
           }
         }
-        
-        /*
-        if (lastIndex >= 0) {
+        // whether the bb is logged
+        writer.write("Is logged: " + bb.getIsLogged() + "\n");
 
-          if (statements.length <= lastIndex) {
-            System.err.println(statements.length);
-            System.err.println(cfg);
-            assert lastIndex < statements.length : "bad BB " + B + " and CFG for " + getCGNode(B);
-          }
-          SSAInstruction last = statements[lastIndex];
-          return (last instanceof SSAAbstractInvokeInstruction);
-        } else {
-          return false;
-        }
-        */        
-        
       } 
     } catch (IOException ex){
       System.out.println("Cannot write to file baslicBlocks.txt");

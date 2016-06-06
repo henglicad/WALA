@@ -28,6 +28,8 @@ public final class BasicBlockInContext<T extends ISSABasicBlock> extends NodeWit
   private final T delegate;
 
   private final CGNode node;
+  
+  private boolean isLogged = false;
 
   public BasicBlockInContext(CGNode node, T bb) {
     if (bb == null) {
@@ -163,6 +165,13 @@ public final class BasicBlockInContext<T extends ISSABasicBlock> extends NodeWit
   @Override
   public Iterator<SSAPiInstruction> iteratePis() {
     return delegate.iteratePis();
+  }
+  
+  public void setIsLogged(boolean loggedOrNot) {
+    isLogged = loggedOrNot;
+  }
+  public boolean getIsLogged() {
+    return isLogged;
   }
 
 }
