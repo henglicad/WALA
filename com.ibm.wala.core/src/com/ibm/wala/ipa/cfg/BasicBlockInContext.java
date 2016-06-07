@@ -167,11 +167,13 @@ public final class BasicBlockInContext<T extends ISSABasicBlock> extends NodeWit
     return delegate.iteratePis();
   }
   
+  // Heng - added: begin
   public void setIsLogged(boolean loggedOrNot) {
     isLogged = loggedOrNot;
   }
   public boolean getIsLogged() {
     return isLogged;
   }
+  // Heng - added: end
 
 }

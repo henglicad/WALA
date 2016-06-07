@@ -41,6 +41,7 @@ import com.ibm.wala.util.io.FileProvider;
 import com.ibm.wala.viz.DotUtil;
 import com.ibm.wala.viz.PDFViewUtil;
 import com.ibm.wala.ipa.cfg.AbstractInterproceduralCFG;
+import com.ibm.wala.ipa.cfg.DotUtilForCFG;
 import com.ibm.wala.ipa.cfg.InterproceduralCFG;
 import com.ibm.wala.ipa.cfg.InterproceduralCFGExceptionPruned;
 
@@ -220,7 +221,7 @@ public class PDFCFG {
       String dotExe = p.getProperty(WalaExamplesProperties.DOT_EXE);
       String dotFile = p.getProperty(WalaProperties.OUTPUT_DIR) + File.separatorChar + "_cfg_"
           + PDFTypeHierarchy.DOT_FILE;
-      DotUtil.dotify(cfg, null, dotFile, pdfFile, dotExe);
+      DotUtilForCFG.dotify(cfg, null, dotFile, pdfFile, dotExe);
       //DotUtil.dotify(cfg, null, dotFile, pdfFile, null);
       
       String gvExe = p.getProperty(WalaExamplesProperties.PDFVIEW_EXE);

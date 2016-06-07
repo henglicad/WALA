@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2002 - 2006 IBM Corporation.
+ * Copyright (c) 2007 IBM Corporation.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package com.ibm.wala.viz;
+package com.ibm.wala.ipa.cfg;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -22,12 +22,9 @@ import com.ibm.wala.util.WalaException;
 import com.ibm.wala.util.collections.Iterator2Collection;
 import com.ibm.wala.util.debug.Assertions;
 import com.ibm.wala.util.graph.Graph;
+import com.ibm.wala.viz.NodeDecorator;
 
-/**
- * utilities for interfacing with DOT
- */
-public class DotUtil {
-
+public class DotUtilForCFG {
   /**
    * possible output formats for dot
    * 
@@ -88,7 +85,7 @@ public class DotUtil {
     if (g == null) {
       throw new IllegalArgumentException("g is null");
     }
-    File f = DotUtil.writeDotFile(g, labels, title, dotFile);
+    File f = DotUtilForCFG.writeDotFile(g, labels, title, dotFile);
     if (dotExe != null) {
       spawnDot(dotExe, outputFile, f);
     }
@@ -136,7 +133,7 @@ public class DotUtil {
       }
     } catch (IOException e) {
       e.printStackTrace();
-      throw new WalaException("IOException in " + DotUtil.class);
+      throw new WalaException("IOException in " + DotUtilForCFG.class);
     } finally {
       if (output != null) {
         try {
@@ -263,15 +260,13 @@ public class DotUtil {
   private static <T> String decorateNode(T n, NodeDecorator<T> d) throws WalaException {
     StringBuffer result = new StringBuffer();
     // Heng - added: add decoration to logged basic blocks - begin
-    /*
     if (n instanceof BasicBlockInContext) {
       BasicBlockInContext bb = (BasicBlockInContext) n;
       if (bb.getIsLogged()) {
-        result.append(" [fillcolor = red]\n");
+        result.append(" [color=red, style=filled, fillcolor=red]\n");
         return result.toString();
       }
     }
-    */
     // Heng - added - end
     result.append(" [ ]\n");
     return result.toString();
@@ -301,7 +296,7 @@ public class DotUtil {
   }
 
   public static void setFontSize(int fontSize) {
-    DotUtil.fontSize = fontSize;
+    DotUtilForCFG.fontSize = fontSize;
   }
-
+  
 }

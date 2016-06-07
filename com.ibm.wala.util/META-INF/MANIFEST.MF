@@ -27,3 +27,4 @@ Export-Package: com.ibm.wala.dataflow.graph,
 Bundle-ClassPath: walaUtil.jar
 Bundle-Vendor: IBM
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.ibm.wala.ipa.cfg
