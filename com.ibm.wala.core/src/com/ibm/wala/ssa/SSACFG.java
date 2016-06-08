@@ -663,6 +663,15 @@ public class SSACFG implements ControlFlowGraph<SSAInstruction, ISSABasicBlock> 
     public SSAInstruction getLastInstruction() {
       return instructions[getLastInstructionIndex()];
     }
+    
+    /*
+     * @see com.ibm.wala.ssa.ISSABasicBlock#getFirstInstruction()
+     * Heng - added
+     */
+    @Override
+    public SSAInstruction getFirstInstruction() {
+      return instructions[getFirstInstructionIndex()];
+    }
 
     /**
      * The {@link ExceptionHandlerBasicBlock} subclass will override this.

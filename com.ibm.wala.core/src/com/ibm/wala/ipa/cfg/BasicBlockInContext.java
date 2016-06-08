@@ -12,6 +12,7 @@ package com.ibm.wala.ipa.cfg;
 
 import java.util.Iterator;
 
+import com.ibm.wala.cfg.ControlFlowGraph;
 import com.ibm.wala.classLoader.IMethod;
 import com.ibm.wala.ipa.callgraph.CGNode;
 import com.ibm.wala.ssa.ISSABasicBlock;
@@ -155,6 +156,15 @@ public final class BasicBlockInContext<T extends ISSABasicBlock> extends NodeWit
   @Override
   public SSAInstruction getLastInstruction() {
     return delegate.getLastInstruction();
+  }
+  
+  /*
+   * @see com.ibm.wala.ssa.ISSABasicBlock#getFirstInstruction()
+   * Heng - added
+   */
+  @Override
+  public SSAInstruction getFirstInstruction() {
+    return delegate.getFirstInstruction();
   }
 
   @Override

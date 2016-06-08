@@ -55,6 +55,12 @@ public interface ISSABasicBlock extends IBasicBlock<SSAInstruction> {
   public SSAInstruction getLastInstruction();
   
   /**
+   * @return the last instruction in this block.
+   * Heng - added
+   */
+  public SSAInstruction getFirstInstruction();
+  
+  /**
    * @return the set of exception types this block may catch.
    */
   public Iterator<TypeReference> getCaughtExceptionTypes();
