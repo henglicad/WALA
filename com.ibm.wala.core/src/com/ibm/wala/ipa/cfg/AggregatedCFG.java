@@ -10,6 +10,7 @@
  *******************************************************************************/
 package com.ibm.wala.ipa.cfg;
 
+import java.util.HashMap;
 import java.util.Iterator;
 
 import com.ibm.wala.ipa.cfg.AggregatedBasicBlockInContext;
@@ -31,8 +32,10 @@ public class AggregatedCFG<T extends ISSABasicBlock> {
   /**
    * We store the graph data in a NumberedGraph data structure, each node is a AggregatedBasicBlockInContext
    */
-  final private NumberedGraph<AggregatedBasicBlockInContext> aggg = 
-      new SlowSparseNumberedGraph<AggregatedBasicBlockInContext>(2);
+  final private NumberedGraph<AggregatedBasicBlockInContext<T>> aggg = 
+      new SlowSparseNumberedGraph<AggregatedBasicBlockInContext<T>>(2);
+  
+  private boolean constructedAggregatedCFG;
   
   /**
    * The original CFG whether each node is a BasicBlockInContext
@@ -43,8 +46,14 @@ public class AggregatedCFG<T extends ISSABasicBlock> {
    */
   private final BitVector isLeader = new BitVector();
   
+  /*
+   * A map from an original basic block (BasicBlockInContext) # to an aggregated basic block (AggregatedBasicBlockInContext) # 
+   */
+  private HashMap bb2abb = new HashMap<Integer, Integer>();
+  
   public AggregatedCFG(AbstractInterproceduralCFG<T> cfg) {
     this.orig = cfg;
+    constructAggregatedCFG();
   }
   
   private void findLeaders() {
@@ -72,12 +81,70 @@ public class AggregatedCFG<T extends ISSABasicBlock> {
     }
   }
   private void buildCFG() {
-    
+    addNodes();
+    System.out.println("bb2abb: " + bb2abb.toString());
+    addEdges();
+  }
+  
+  private void addNodes() {
+    for (Iterator<BasicBlockInContext<T>> bbs = orig.iterator(); bbs.hasNext();) {
+      BasicBlockInContext<T> bb = bbs.next();
+      if (isLeader.get(orig.getNumber(bb))) {
+        AggregatedBasicBlockInContext<T> abb = new AggregatedBasicBlockInContext<T>(bb);
+        //abb.addBasicBlock(bb);
+        aggg.addNode(abb);
+        bb2abb.put(orig.getNumber(bb), aggg.getNumber(abb));
+        if (orig.getSuccNodes(bb).hasNext()) {
+          BasicBlockInContext<T> succbb = orig.getSuccNodes(bb).next();
+          while (!isLeader.get(orig.getNumber(succbb))) {
+            abb.addBasicBlock(succbb);
+            bb2abb.put(orig.getNumber(succbb), aggg.getNumber(abb));
+            if (orig.getSuccNodes(succbb).hasNext()) {
+              succbb = orig.getSuccNodes(succbb).next();
+            } else {
+              break;
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  /**
+   * An aggregated basic block A is the successor of an aggregated basic block B iff
+   * the first basic block of A is a successor of the last basic block of B in the original cfg.
+   */
+  private void addEdges() {
+    for (Iterator<AggregatedBasicBlockInContext<T>> abbs = aggg.iterator(); abbs.hasNext();) {
+      AggregatedBasicBlockInContext<T> abb = abbs.next();
+      BasicBlockInContext<T> lbb = abb.getLastBasicBlock();
+      for (Iterator<BasicBlockInContext<T>> succbbs = orig.getSuccNodes(lbb); succbbs.hasNext();){
+        BasicBlockInContext<T> succbb = succbbs.next();
+        AggregatedBasicBlockInContext<T> succabb = aggg.getNode((int)bb2abb.get(orig.getNumber(succbb)));
+        aggg.addEdge(abb, succabb);
+      }
+    }
   }
 
-  public void make() {
-    findLeaders();
-    buildCFG();
+  public NumberedGraph<AggregatedBasicBlockInContext<T>> constructAggregatedCFG() {
+    if (!constructedAggregatedCFG) {
+      findLeaders();
+      System.out.println("Number of leaders: " + isLeader.toString());
+      buildCFG();
+      constructedAggregatedCFG = true;
+      System.out.println("Number of aggregated basic blocks: " + aggg.getNumberOfNodes() + "\n");
+    }
+    return this.aggg;
   }
 
+  public Iterator<AggregatedBasicBlockInContext<T>> iterator() {
+    if (!constructedAggregatedCFG) {
+      constructAggregatedCFG();
+    }
+    return this.aggg.iterator();
+  }
+  
+  public NumberedGraph<AggregatedBasicBlockInContext<T>> getGraph() {
+    return this.aggg;
+  }
 }

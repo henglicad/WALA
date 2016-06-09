@@ -14,15 +14,27 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.ListIterator;
 
-public class AggregatedBasicBlockInContext {
-  ArrayList<BasicBlockInContext> abb;
+import com.ibm.wala.ssa.ISSABasicBlock;
+
+/*
+ * A aggregated basic block is group of basic blocks on a simple path
+ * The basic blocks are stored in order
+ */
+
+public class AggregatedBasicBlockInContext<T extends ISSABasicBlock> {
+  ArrayList<BasicBlockInContext<T>> abb;
   boolean isLogged = false;
   
   public AggregatedBasicBlockInContext() {
-    abb = new ArrayList<BasicBlockInContext>();
+    abb = new ArrayList<BasicBlockInContext<T>>();
   }
   
-  public void addBasicBlock(BasicBlockInContext bb) {
+  public AggregatedBasicBlockInContext(BasicBlockInContext<T> bb) {
+    abb = new ArrayList<BasicBlockInContext<T>>();
+    addBasicBlock(bb);
+  }
+  
+  public void addBasicBlock(BasicBlockInContext<T> bb) {
     abb.add(bb);
     if (bb.getIsLogged()) {
       setIsLogged(true);
@@ -33,17 +45,17 @@ public class AggregatedBasicBlockInContext {
     return abb.size();
   }
   
-  public Iterator<BasicBlockInContext> iterator() {
+  public Iterator<BasicBlockInContext<T>> iterator() {
     return abb.iterator();
   }
-  public ListIterator<BasicBlockInContext> listIterator() {
+  public ListIterator<BasicBlockInContext<T>> listIterator() {
     return abb.listIterator();
   }
   
-  public BasicBlockInContext getFirstBasicBlock() {
+  public BasicBlockInContext<T> getFirstBasicBlock() {
     return abb.get(0);
   }
-  public BasicBlockInContext getLastBasicBlock() {
+  public BasicBlockInContext<T> getLastBasicBlock() {
     return abb.get(abb.size()-1);
   }
   
@@ -56,7 +68,7 @@ public class AggregatedBasicBlockInContext {
   }
   
   public String toString() {
-    BasicBlockInContext firstBB = getFirstBasicBlock();
+    BasicBlockInContext<T> firstBB = getFirstBasicBlock();
     return "FirstInst[" + firstBB.getFirstInstruction().toString() + "]";
     /*
     return "BB[SSA:" + getFirstInstructionIndex() + ".." + getLastInstructionIndex() + "]" + getNumber() + " - "

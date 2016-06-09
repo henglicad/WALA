@@ -478,7 +478,7 @@ public abstract class AbstractInterproceduralCFG<T extends ISSABasicBlock> imple
         */
         if (!clr_str.contains("Application"))
           continue; // only consider application code (i.e., excluding Java language code and other libraries)
-        System.out.println("Method name: " + n.getMethod().toString());
+        //System.out.println("Method name: " + n.getMethod().toString());
         // Heng added code, end ***************************************
         
         addIntraproceduralNodesAndEdgesForCGNodeIfNeeded(n);
@@ -507,9 +507,9 @@ public abstract class AbstractInterproceduralCFG<T extends ISSABasicBlock> imple
         ControlFlowGraph<SSAInstruction, T> cfg = getCFG(bb);
         CallSiteReference site = getCallSiteForCallBlock(bb, cfg);
         String targetMethodStr = site.getDeclaredTarget().toString();
-        System.out.println("targetMethod: " + targetMethodStr);
+        //System.out.println("targetMethod: " + targetMethodStr);
         String[] subStrs = targetMethodStr.split(",");
-        System.out.println(java.util.Arrays.toString(subStrs));
+        //System.out.println(java.util.Arrays.toString(subStrs));
         if (subStrs[1].contains("/Logger") &&
             (subStrs[2].contains("trace(") ||
                 subStrs[2].contains("debug(") ||

@@ -267,6 +267,13 @@ public class DotUtilForCFG {
         return result.toString();
       }
     }
+    if (n instanceof AggregatedBasicBlockInContext) {
+      AggregatedBasicBlockInContext abb = (AggregatedBasicBlockInContext) n;
+      if (abb.getIsLogged()) {
+        result.append(" [color=red, style=filled, fillcolor=red]\n");
+        return result.toString();
+      }
+    }
     // Heng - added - end
     result.append(" [ ]\n");
     return result.toString();

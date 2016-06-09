@@ -31,6 +31,7 @@ import com.ibm.wala.ipa.callgraph.Entrypoint;
 import com.ibm.wala.ipa.callgraph.impl.Util;
 import com.ibm.wala.ipa.cha.ClassHierarchy;
 import com.ibm.wala.properties.WalaProperties;
+import com.ibm.wala.ssa.ISSABasicBlock;
 import com.ibm.wala.util.WalaException;
 import com.ibm.wala.util.config.AnalysisScopeReader;
 import com.ibm.wala.util.debug.Assertions;
@@ -41,6 +42,7 @@ import com.ibm.wala.util.io.FileProvider;
 import com.ibm.wala.viz.DotUtil;
 import com.ibm.wala.viz.PDFViewUtil;
 import com.ibm.wala.ipa.cfg.AbstractInterproceduralCFG;
+import com.ibm.wala.ipa.cfg.AggregatedCFG;
 import com.ibm.wala.ipa.cfg.DotUtilForCFG;
 import com.ibm.wala.ipa.cfg.InterproceduralCFG;
 import com.ibm.wala.ipa.cfg.InterproceduralCFGExceptionPruned;
@@ -57,6 +59,7 @@ public class PDFCFG {
   private final static boolean CHECK_GRAPH = false;
   private final static String PDF_FILE_CG = "cg.pdf";
   private final static String PDF_FILE_CFG = "cfg.pdf";
+  private final static String PDF_FILE_AGGCFG = "aggcfg.pdf";
 
   /**
    * Usage: SWTCallGraph -appJar [jar file name]
@@ -80,6 +83,8 @@ public class PDFCFG {
     AbstractInterproceduralCFG cfg = new InterproceduralCFGExceptionPruned(cg);
     cfg.printBasicBlocks();
     visualizeControlFlowGraph(cfg);
+    AggregatedCFG aggCFG = new AggregatedCFG(cfg);
+    visualizeAggregatedCFG(aggCFG);
   }
 
   /**
@@ -222,6 +227,34 @@ public class PDFCFG {
       String dotFile = p.getProperty(WalaProperties.OUTPUT_DIR) + File.separatorChar + "_cfg_"
           + PDFTypeHierarchy.DOT_FILE;
       DotUtilForCFG.dotify(cfg, null, dotFile, pdfFile, dotExe);
+      //DotUtil.dotify(cfg, null, dotFile, pdfFile, null);
+      
+      String gvExe = p.getProperty(WalaExamplesProperties.PDFVIEW_EXE);
+      return PDFViewUtil.launchPDFView(pdfFile, gvExe);
+      
+      //return null;
+    } catch (WalaException e) {
+      e.printStackTrace();
+      return null;
+    }
+  }
+  
+  public static Process visualizeAggregatedCFG(AggregatedCFG aggCFG) {
+    try {
+      Properties p = null;
+      try {
+        p = WalaExamplesProperties.loadProperties();
+        p.putAll(WalaProperties.loadProperties());
+      } catch (WalaException e) {
+        e.printStackTrace();
+        Assertions.UNREACHABLE();
+      }
+      String pdfFile = p.getProperty(WalaProperties.OUTPUT_DIR) + File.separatorChar + PDF_FILE_AGGCFG;
+
+      String dotExe = p.getProperty(WalaExamplesProperties.DOT_EXE);
+      String dotFile = p.getProperty(WalaProperties.OUTPUT_DIR) + File.separatorChar + "_aggcfg_"
+          + PDFTypeHierarchy.DOT_FILE;
+      DotUtilForCFG.dotify(aggCFG.getGraph(), null, dotFile, pdfFile, dotExe);
       //DotUtil.dotify(cfg, null, dotFile, pdfFile, null);
       
       String gvExe = p.getProperty(WalaExamplesProperties.PDFVIEW_EXE);

@@ -634,6 +634,12 @@ public class ExplodedControlFlowGraph implements ControlFlowGraph<SSAInstruction
       }
       return "ExplodedBlock[" + getNumber() + "](original:" + original + ")";
     }
+
+    @Override
+    public SSAInstruction getFirstInstruction() {
+      // TODO Auto-generated method stub
+      return null;
+    }
   }
 
   @Override
