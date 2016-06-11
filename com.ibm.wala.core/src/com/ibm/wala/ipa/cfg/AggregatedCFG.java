@@ -90,9 +90,9 @@ public class AggregatedCFG<T extends ISSABasicBlock> {
     for (Iterator<BasicBlockInContext<T>> bbs = orig.iterator(); bbs.hasNext();) {
       BasicBlockInContext<T> bb = bbs.next();
       if (isLeader.get(orig.getNumber(bb))) {
-        AggregatedBasicBlockInContext<T> abb = new AggregatedBasicBlockInContext<T>(bb);
-        //abb.addBasicBlock(bb);
+        AggregatedBasicBlockInContext<T> abb = new AggregatedBasicBlockInContext<T>();
         aggg.addNode(abb);
+        abb.addBasicBlock(bb);
         bb2abb.put(orig.getNumber(bb), aggg.getNumber(abb));
         if (orig.getSuccNodes(bb).hasNext()) {
           BasicBlockInContext<T> succbb = orig.getSuccNodes(bb).next();

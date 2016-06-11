@@ -69,11 +69,21 @@ public class AggregatedBasicBlockInContext<T extends ISSABasicBlock> {
   
   public String toString() {
     BasicBlockInContext<T> firstBB = getFirstBasicBlock();
-    return "FirstInst[" + firstBB.getFirstInstruction().toString() + "]";
+    
     /*
-    return "BB[SSA:" + getFirstInstructionIndex() + ".." + getLastInstructionIndex() + "]" + getNumber() + " - "
-        + method.getSignature();
+    try {
+      String firstInst = firstBB.getFirstInstruction().toString();
+      return "FirstInst[" + firstInst + "]";
+    } catch(ArrayIndexOutOfBoundsException ex) {
+      String firstInst = "No Instruction";
+      return "FirstInst[" + firstInst + "]";
+    } catch (NullPointerException ex) {
+      String firstInst = "Null Instruction";
+      return "FirstInst[" + firstInst + "]";
+    }
     */
+    return "Leader[SSA index:" + firstBB.getFirstInstructionIndex() + "]" + " - "
+        + firstBB.getMethod().getSignature();
   }
 
 }
