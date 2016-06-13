@@ -1,0 +1,2 @@
+Primordial,Java,stdlib,none
+Application,Java,jarFile,slf4jHelloWorld.jar
