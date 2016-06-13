@@ -75,7 +75,7 @@ public class PDFCFG {
    */
   public static void main(String[] args) throws WalaException {
     Properties p = CommandLine.parse(args);
-    PDFCallGraph.validateCommandLine(p);
+    validateCommandLine(p);
     //run(p);
     CallGraph cg = buildCallGraph(p);
     visualizeCallGraph(cg);
@@ -105,10 +105,12 @@ public class PDFCFG {
   public static CallGraph buildCallGraph(Properties p) throws WalaException {
 
     try {
+      /*
       String appJar = p.getProperty("appJar");
       if (PDFCallGraph.isDirectory(appJar)) {
         appJar = PDFCallGraph.findJarFiles(new String[] { appJar });
       }
+      */
 
       String exclusionFile = p.getProperty("exclusions");
 
@@ -123,6 +125,7 @@ public class PDFCFG {
       ClassHierarchy cha = ClassHierarchy.make(scope);
 
       Iterable<Entrypoint> entrypoints = null;
+      /*
       JarFile jar = new JarFile(appJar);
       if (jar.getManifest() != null) {
         String mainClass = jar.getManifest().getMainAttributes().getValue("Main-Class");
@@ -130,6 +133,7 @@ public class PDFCFG {
           entrypoints = com.ibm.wala.ipa.callgraph.impl.Util.makeMainEntrypoints(scope, cha, "L" + mainClass.replace('.', '/'));
         }
       }
+      */
       if (entrypoints == null) {
         entrypoints = com.ibm.wala.ipa.callgraph.impl.Util.makeMainEntrypoints(scope, cha);
       }
@@ -264,6 +268,12 @@ public class PDFCFG {
     } catch (WalaException e) {
       e.printStackTrace();
       return null;
+    }
+  }
+  
+  public static void validateCommandLine(Properties p) {
+    if (p.get("scopeFile") == null) {
+      throw new UnsupportedOperationException("expected command-line to include -scopeFile");
     }
   }
   
