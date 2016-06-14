@@ -85,12 +85,14 @@ public class PDFCFG {
     //run(p);
     CallGraph cg = buildCallGraph(p);
     visualizeCallGraph(cg);
+
     //AbstractInterproceduralCFG cfg = new InterproceduralCFG(cg);
     AbstractInterproceduralCFG cfg = new InterproceduralCFGExceptionPruned(cg);
     cfg.printBasicBlocks();
     visualizeControlFlowGraph(cfg);
     AggregatedCFG aggCFG = new AggregatedCFG(cfg);
     visualizeAggregatedCFG(aggCFG);
+
   }
 
   /**

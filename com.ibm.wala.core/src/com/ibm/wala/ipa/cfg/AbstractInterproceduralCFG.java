@@ -476,9 +476,15 @@ public abstract class AbstractInterproceduralCFG<T extends ISSABasicBlock> imple
         System.out.println("ClassLoaderReference: " + clr_str);
         System.out.println("***************************");       
         */
-        if (!clr_str.contains("Application"))
+        
+        boolean isRootMethod = false;
+        String methodSig = n.getMethod().getSignature().toString();
+        
+        if (!methodSig.contains("com.ibm.wala.FakeRootClass") && !clr_str.contains("Application"))
           continue; // only consider application code (i.e., excluding Java language code and other libraries)
+                    // but keep the methods of the FakeRootClass
         //System.out.println("Method name: " + n.getMethod().toString());
+        System.out.println("Method Signature: " + methodSig + "\n");
         // Heng added code, end ***************************************
         
         addIntraproceduralNodesAndEdgesForCGNodeIfNeeded(n);
