@@ -12,8 +12,14 @@ package com.ibm.wala.examples.drivers;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 import java.util.jar.JarFile;
+
+import com.ibm.wala.classLoader.JarFileModule;
+import com.ibm.wala.classLoader.Module;
 
 //import org.eclipse.jface.window.ApplicationWindow;
 
@@ -105,37 +111,72 @@ public class PDFCFG {
   public static CallGraph buildCallGraph(Properties p) throws WalaException {
 
     try {
-      /*
+      
       String appJar = p.getProperty("appJar");
-      if (PDFCallGraph.isDirectory(appJar)) {
+      if (appJar != null && PDFCallGraph.isDirectory(appJar)) {
         appJar = PDFCallGraph.findJarFiles(new String[] { appJar });
       }
-      */
+      
 
       String exclusionFile = p.getProperty("exclusions");
 
       String scopeFile = p.getProperty("scopeFile");
 
-      //AnalysisScope scope = AnalysisScopeReader.makeJavaBinaryAnalysisScope(appJar, exclusionFile != null ? new File(exclusionFile)
-      //    : (new FileProvider()).getFile(CallGraphTestUtil.REGRESSION_EXCLUSIONS));
-
-      AnalysisScope scope = AnalysisScopeReader.readJavaScope(scopeFile, exclusionFile != null ? new File(exclusionFile)
-          : (new FileProvider()).getFile(CallGraphTestUtil.REGRESSION_EXCLUSIONS),PDFCFG.class.getClassLoader());
-
+      AnalysisScope scope = null;
+      if (appJar != null) {
+        scope = AnalysisScopeReader.makeJavaBinaryAnalysisScope(appJar, exclusionFile != null ? new File(exclusionFile)
+            : (new FileProvider()).getFile(CallGraphTestUtil.REGRESSION_EXCLUSIONS));
+      } else if (scopeFile != null) {      
+        scope = AnalysisScopeReader.readJavaScope(scopeFile, exclusionFile != null ? new File(exclusionFile)
+            : (new FileProvider()).getFile(CallGraphTestUtil.REGRESSION_EXCLUSIONS),PDFCFG.class.getClassLoader());
+      } else {
+        System.out.println("Error: should specify either appJar or scopeFile");
+        System.exit(1);
+      }
+      
       ClassHierarchy cha = ClassHierarchy.make(scope);
 
       Iterable<Entrypoint> entrypoints = null;
-      /*
-      JarFile jar = new JarFile(appJar);
-      if (jar.getManifest() != null) {
-        String mainClass = jar.getManifest().getMainAttributes().getValue("Main-Class");
-        if (mainClass != null) {
-          entrypoints = com.ibm.wala.ipa.callgraph.impl.Util.makeMainEntrypoints(scope, cha, "L" + mainClass.replace('.', '/'));
+      
+      if (appJar != null) {
+        JarFile jar = new JarFile(appJar);
+        if (jar.getManifest() != null) {
+          String mainClass = jar.getManifest().getMainAttributes().getValue("Main-Class");
+          if (mainClass != null) {
+            entrypoints = com.ibm.wala.ipa.callgraph.impl.Util.makeMainEntrypoints(scope, cha, "L" + mainClass.replace('.', '/'));
+          }
+        }
+      } else if (scopeFile != null) {
+        // TODO - add entry points
+        List<String> mainClasses = new ArrayList<String>();
+        for (Iterator MS = scope.getModules(scope.getApplicationLoader()).iterator(); MS.hasNext();) {
+          Module M = (Module) MS.next();
+          if (M instanceof JarFileModule) {
+            JarFile JF = ((JarFileModule) M).getJarFile();
+            if (JF.getManifest() != null) {
+              String mainClass = JF.getManifest().getMainAttributes().getValue("Main-Class");
+              mainClasses.add(mainClass);
+            }
+          }
+        }
+        if (!mainClasses.isEmpty()) {
+          for (int i = 0; i < mainClasses.size(); i++) {
+            mainClasses.set(i, "L" + mainClasses.get(i).replace('.', '/'));
+          }
+          String[] mainClassArray = new String[mainClasses.size()];
+          mainClassArray = mainClasses.toArray(mainClassArray);
+          entrypoints = com.ibm.wala.ipa.callgraph.impl.Util.makeMainEntrypoints(scope, cha, mainClassArray);
+      
         }
       }
-      */
       if (entrypoints == null) {
         entrypoints = com.ibm.wala.ipa.callgraph.impl.Util.makeMainEntrypoints(scope, cha);
+      }
+      
+      System.out.println("Entry point: ");
+      
+      for (Iterator<Entrypoint> entries = entrypoints.iterator(); entries.hasNext();) {
+        System.out.println(entries.next().toString());
       }
       
       AnalysisOptions options = new AnalysisOptions(scope, entrypoints);
@@ -272,8 +313,8 @@ public class PDFCFG {
   }
   
   public static void validateCommandLine(Properties p) {
-    if (p.get("scopeFile") == null) {
-      throw new UnsupportedOperationException("expected command-line to include -scopeFile");
+    if (p.get("appJar") == null && p.get("scopeFile") == null) {
+      throw new UnsupportedOperationException("expected command-line to include -appJar or -scopeFile");
     }
   }
   
