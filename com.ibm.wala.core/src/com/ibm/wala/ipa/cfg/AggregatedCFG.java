@@ -46,6 +46,11 @@ public class AggregatedCFG<T extends ISSABasicBlock> {
    */
   private final BitVector isLeader = new BitVector();
   
+  /**
+   * a fake root of the CFG, the fake root connect to all nodes without a predecessor
+   */
+  AggregatedBasicBlockInContext<T> fakeRoot;
+  
   /*
    * A map from an original basic block (BasicBlockInContext) # to an aggregated basic block (AggregatedBasicBlockInContext) # 
    */
@@ -82,7 +87,7 @@ public class AggregatedCFG<T extends ISSABasicBlock> {
   }
   private void buildCFG() {
     addNodes();
-    System.out.println("bb2abb: " + bb2abb.toString());
+    //System.out.println("bb2abb: " + bb2abb.toString());
     addEdges();
   }
   
@@ -108,6 +113,13 @@ public class AggregatedCFG<T extends ISSABasicBlock> {
         }
       }
     }
+    /*
+     * Add a fake root node
+     */
+    AggregatedBasicBlockInContext<T> _fakeRoot = new AggregatedBasicBlockInContext<T>();
+    _fakeRoot.setIsFakeRoot(true);
+    setFakeRoot(_fakeRoot);
+    aggg.addNode(_fakeRoot);
   }
   
   /**
@@ -117,6 +129,11 @@ public class AggregatedCFG<T extends ISSABasicBlock> {
   private void addEdges() {
     for (Iterator<AggregatedBasicBlockInContext<T>> abbs = aggg.iterator(); abbs.hasNext();) {
       AggregatedBasicBlockInContext<T> abb = abbs.next();
+      if (abb.isFakeRoot()) continue;
+      BasicBlockInContext<T> fbb = abb.getFirstBasicBlock();
+      if (orig.getPredNodeCount(fbb) == 0) { // no predecessor
+        aggg.addEdge(fakeRoot, abb);
+      }
       BasicBlockInContext<T> lbb = abb.getLastBasicBlock();
       for (Iterator<BasicBlockInContext<T>> succbbs = orig.getSuccNodes(lbb); succbbs.hasNext();){
         BasicBlockInContext<T> succbb = succbbs.next();
@@ -146,5 +163,12 @@ public class AggregatedCFG<T extends ISSABasicBlock> {
   
   public NumberedGraph<AggregatedBasicBlockInContext<T>> getGraph() {
     return this.aggg;
+  }
+  
+  public void setFakeRoot(AggregatedBasicBlockInContext<T> _fakeRoot) {
+    fakeRoot = _fakeRoot;
+  }
+  public AggregatedBasicBlockInContext<T> getFakeRoot() {
+    return fakeRoot;
   }
 }

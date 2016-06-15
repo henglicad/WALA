@@ -480,7 +480,8 @@ public abstract class AbstractInterproceduralCFG<T extends ISSABasicBlock> imple
         boolean isRootMethod = false;
         String methodSig = n.getMethod().getSignature().toString();
         
-        if (!methodSig.contains("com.ibm.wala.FakeRootClass") && !clr_str.contains("Application"))
+        //if (!methodSig.contains("com.ibm.wala.FakeRootClass") && !clr_str.contains("Application"))
+        if (!clr_str.contains("Application"))
           continue; // only consider application code (i.e., excluding Java language code and other libraries)
                     // but keep the methods of the FakeRootClass
         //System.out.println("Method name: " + n.getMethod().toString());

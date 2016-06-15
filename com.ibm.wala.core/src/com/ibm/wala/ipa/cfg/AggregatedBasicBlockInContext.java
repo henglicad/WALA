@@ -24,6 +24,7 @@ import com.ibm.wala.ssa.ISSABasicBlock;
 public class AggregatedBasicBlockInContext<T extends ISSABasicBlock> {
   ArrayList<BasicBlockInContext<T>> abb;
   boolean isLogged = false;
+  boolean isFakeRoot = false;
   
   public AggregatedBasicBlockInContext() {
     abb = new ArrayList<BasicBlockInContext<T>>();
@@ -67,7 +68,20 @@ public class AggregatedBasicBlockInContext<T extends ISSABasicBlock> {
     return isLogged;
   }
   
+  public void setIsFakeRoot(boolean isFakeRootOrNot) {
+    isFakeRoot = isFakeRootOrNot;
+  }
+  
+  public boolean isFakeRoot() {
+    return isFakeRoot;
+  }
+  
   public String toString() {
+    
+    if (this.isFakeRoot()) {
+      return "FakeRoot";
+    }
+    
     BasicBlockInContext<T> firstBB = getFirstBasicBlock();
     
     /*
