@@ -40,6 +40,8 @@ import com.ibm.wala.util.intset.BitVectorIntSet;
 import com.ibm.wala.util.intset.IntSet;
 import com.ibm.wala.util.intset.MutableIntSet;
 import com.ibm.wala.types.ClassLoaderReference;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 /**
  * Interprocedural control-flow graph, constructed lazily.
@@ -518,6 +520,7 @@ public abstract class AbstractInterproceduralCFG<T extends ISSABasicBlock> imple
         CallSiteReference site = getCallSiteForCallBlock(bb, cfg);
         String targetMethodSig = site.getDeclaredTarget().getSignature();
 
+        /*
         if (targetMethodSig.contains("Logger.trace(") ||
             targetMethodSig.contains("Logger.debug(") ||
             targetMethodSig.contains("Logger.info(") ||
@@ -525,6 +528,13 @@ public abstract class AbstractInterproceduralCFG<T extends ISSABasicBlock> imple
             targetMethodSig.contains("Logger.error(") ||
             targetMethodSig.contains("Logger.fatal(") 
             ) {
+          bb.setIsLogged(true);
+        }
+        */
+        Pattern logPattern = 
+            Pattern.compile("(Logger|Log)\\.(trace|debug|info|warn|error|fatal)(");
+        
+        if (logPattern.matcher(targetMethodSig).find()) {
           bb.setIsLogged(true);
         }
         
