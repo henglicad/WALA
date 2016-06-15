@@ -1,0 +1,2 @@
+Primordial,Java,stdlib,none
+Application,Java,jarFile,hadoop-common-2.6.4.jar

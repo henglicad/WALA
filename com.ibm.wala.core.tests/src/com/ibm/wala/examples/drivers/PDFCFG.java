@@ -157,7 +157,9 @@ public class PDFCFG {
             JarFile JF = ((JarFileModule) M).getJarFile();
             if (JF.getManifest() != null) {
               String mainClass = JF.getManifest().getMainAttributes().getValue("Main-Class");
-              mainClasses.add(mainClass);
+              if (mainClass != null) {
+                mainClasses.add(mainClass);
+              }
             }
           }
         }
