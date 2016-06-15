@@ -485,7 +485,7 @@ public abstract class AbstractInterproceduralCFG<T extends ISSABasicBlock> imple
           continue; // only consider application code (i.e., excluding Java language code and other libraries)
                     // but keep the methods of the FakeRootClass
         //System.out.println("Method name: " + n.getMethod().toString());
-        System.out.println("Method Signature: " + methodSig + "\n");
+        //System.out.println("Method Signature: " + methodSig + "\n");
         // Heng added code, end ***************************************
         
         addIntraproceduralNodesAndEdgesForCGNodeIfNeeded(n);
@@ -500,6 +500,9 @@ public abstract class AbstractInterproceduralCFG<T extends ISSABasicBlock> imple
 
       // Heng - added: detect logging info of each basic block
       detectLoggingInfoForBasicBlocks();
+      
+      // Heng: prune CFG
+      pruneCFG(true, true);
     }
   }
 
@@ -513,21 +516,86 @@ public abstract class AbstractInterproceduralCFG<T extends ISSABasicBlock> imple
       if (hasCall(bb)) {
         ControlFlowGraph<SSAInstruction, T> cfg = getCFG(bb);
         CallSiteReference site = getCallSiteForCallBlock(bb, cfg);
-        String targetMethodStr = site.getDeclaredTarget().toString();
-        //System.out.println("targetMethod: " + targetMethodStr);
-        String[] subStrs = targetMethodStr.split(",");
-        //System.out.println(java.util.Arrays.toString(subStrs));
-        if (subStrs[1].contains("/Logger") &&
-            (subStrs[2].contains("trace(") ||
-                subStrs[2].contains("debug(") ||
-                subStrs[2].contains("info(") ||
-                subStrs[2].contains("warn(") ||
-                subStrs[2].contains("error(") ||
-                subStrs[2].contains("fatal(") 
-                )) {
+        String targetMethodSig = site.getDeclaredTarget().getSignature();
+
+        if (targetMethodSig.contains("Logger.trace(") ||
+            targetMethodSig.contains("Logger.debug(") ||
+            targetMethodSig.contains("Logger.info(") ||
+            targetMethodSig.contains("Logger.warn(") ||
+            targetMethodSig.contains("Logger.error(") ||
+            targetMethodSig.contains("Logger.fatal(") 
+            ) {
           bb.setIsLogged(true);
         }
         
+      }
+    }
+  }
+  
+  /**
+   * Heng - added the method
+   * prune the CFG: remove edges resulted from logging guard; remove edges resulted from closing try-resource.
+   */
+  public void pruneCFG(boolean removeLoggingGuardEdges, boolean removeClosingTryResourceEdges) {
+    if (removeLoggingGuardEdges) {
+      for (Iterator<BasicBlockInContext<T>> bbs = this.iterator(); bbs.hasNext();) {
+        BasicBlockInContext<T> bb = bbs.next();
+        if (hasCall(bb)) {
+          ControlFlowGraph<SSAInstruction, T> cfg = getCFG(bb);
+          CallSiteReference site = getCallSiteForCallBlock(bb, cfg);
+          String targetMethodSig = site.getDeclaredTarget().getSignature();
+          //System.out.println(targetMethodSig);
+          if (targetMethodSig.contains("Logger.isTraceEnabled(") ||
+              targetMethodSig.contains("Logger.isDebugEnabled(") ||
+              targetMethodSig.contains("Logger.isInfoEnabled(") ||
+              targetMethodSig.contains("Logger.isWarnEnabled(") ||
+              targetMethodSig.contains("Logger.isErrorEnabled(") ||
+              targetMethodSig.contains("Logger.isFatalEnabled(")) {
+            bb.setIsLoggingGuard(true);
+            
+            // the successor of a logging guard should be a conditional branch
+            BasicBlockInContext<T> guardNext = getSuccNodes(bb).next();
+            if (getSuccNodeCount(guardNext) == 2) {
+              for (Iterator<BasicBlockInContext<T>> succs = getSuccNodes(guardNext); succs.hasNext();) {
+                BasicBlockInContext<T> succ = succs.next();
+                // remove the successor with two or more predecessor (it is the "short path" end node)
+                if (getPredNodeCount(succ) > 1) {
+                  // remove the short path
+                  g.removeEdge(guardNext, succ);
+                  break;
+                }
+                
+              }
+            }
+          }
+        }
+
+      }
+    }
+    
+    if (removeClosingTryResourceEdges) {
+      for (Iterator<BasicBlockInContext<T>> bbs = this.iterator(); bbs.hasNext();) {
+        BasicBlockInContext<T> bb = bbs.next();
+        if (hasCall(bb)) {
+          ControlFlowGraph<SSAInstruction, T> cfg = getCFG(bb);
+          CallSiteReference site = getCallSiteForCallBlock(bb, cfg);
+          String targetMethodSig = site.getDeclaredTarget().getSignature();
+          //System.out.println(targetMethodSig);
+          if (targetMethodSig.contains(".close(")) {
+            BasicBlockInContext<T> closePred = getPredNodes(bb).next();
+            if (getSuccNodeCount(closePred) == 2) {
+              for (Iterator<BasicBlockInContext<T>> succs = getSuccNodes(closePred); succs.hasNext();) {
+                BasicBlockInContext<T> succ = succs.next();
+                if (getPredNodeCount(succ) > 1) {
+                  // remove the short path
+                  g.removeEdge(closePred, succ);
+                  break;
+                }
+              }
+            }
+          }
+          
+        }
       }
     }
   }

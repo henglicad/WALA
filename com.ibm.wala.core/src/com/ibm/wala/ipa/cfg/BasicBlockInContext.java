@@ -31,6 +31,8 @@ public final class BasicBlockInContext<T extends ISSABasicBlock> extends NodeWit
   private final CGNode node;
   
   private boolean isLogged = false;
+  
+  private boolean isLoggingGuard = false;
 
   public BasicBlockInContext(CGNode node, T bb) {
     if (bb == null) {
@@ -183,6 +185,12 @@ public final class BasicBlockInContext<T extends ISSABasicBlock> extends NodeWit
   }
   public boolean getIsLogged() {
     return isLogged;
+  }
+  public void setIsLoggingGuard(boolean isLoggingGuardOrNot) {
+    isLoggingGuard = isLoggingGuardOrNot;
+  }
+  public boolean getIsLoggingGuard() {
+    return isLoggingGuard;
   }
   // Heng - added: end
 
