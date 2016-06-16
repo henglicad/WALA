@@ -513,6 +513,9 @@ public abstract class AbstractInterproceduralCFG<T extends ISSABasicBlock> imple
    * check each basic block and find whether it is logged or not 
    */
   public void detectLoggingInfoForBasicBlocks() {
+    Pattern logPattern = 
+        Pattern.compile("(Logger|Log)\\.(trace|debug|info|warn|error|fatal)\\(",
+            Pattern.CASE_INSENSITIVE);
     for (Iterator<BasicBlockInContext<T>> bbs = this.iterator(); bbs.hasNext();) {
       BasicBlockInContext<T> bb = bbs.next();
       if (hasCall(bb)) {
@@ -531,8 +534,6 @@ public abstract class AbstractInterproceduralCFG<T extends ISSABasicBlock> imple
           bb.setIsLogged(true);
         }
         */
-        Pattern logPattern = 
-            Pattern.compile("(Logger|Log)\\.(trace|debug|info|warn|error|fatal)(");
         
         if (logPattern.matcher(targetMethodSig).find()) {
           bb.setIsLogged(true);
@@ -548,6 +549,9 @@ public abstract class AbstractInterproceduralCFG<T extends ISSABasicBlock> imple
    */
   public void pruneCFG(boolean removeLoggingGuardEdges, boolean removeClosingTryResourceEdges) {
     if (removeLoggingGuardEdges) {
+      Pattern logGuardPattern = 
+          Pattern.compile("(Logger|Log)\\.is(Trace|Debug|Info|Warn|Error|Fatal)Enabled\\(",
+              Pattern.CASE_INSENSITIVE);
       for (Iterator<BasicBlockInContext<T>> bbs = this.iterator(); bbs.hasNext();) {
         BasicBlockInContext<T> bb = bbs.next();
         if (hasCall(bb)) {
@@ -555,12 +559,15 @@ public abstract class AbstractInterproceduralCFG<T extends ISSABasicBlock> imple
           CallSiteReference site = getCallSiteForCallBlock(bb, cfg);
           String targetMethodSig = site.getDeclaredTarget().getSignature();
           //System.out.println(targetMethodSig);
+          /*
           if (targetMethodSig.contains("Logger.isTraceEnabled(") ||
               targetMethodSig.contains("Logger.isDebugEnabled(") ||
               targetMethodSig.contains("Logger.isInfoEnabled(") ||
               targetMethodSig.contains("Logger.isWarnEnabled(") ||
               targetMethodSig.contains("Logger.isErrorEnabled(") ||
               targetMethodSig.contains("Logger.isFatalEnabled(")) {
+          */
+          if (logGuardPattern.matcher(targetMethodSig).find()) {
             bb.setIsLoggingGuard(true);
             
             // the successor of a logging guard should be a conditional branch
