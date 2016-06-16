@@ -25,6 +25,7 @@ public class AggregatedBasicBlockInContext<T extends ISSABasicBlock> {
   ArrayList<BasicBlockInContext<T>> abb;
   boolean isLogged = false;
   boolean isFakeRoot = false;
+  int nodeId = -1000; // unique id in a CFG; -10000 indicate the node id is not set 
   
   public AggregatedBasicBlockInContext() {
     abb = new ArrayList<BasicBlockInContext<T>>();
@@ -76,28 +77,32 @@ public class AggregatedBasicBlockInContext<T extends ISSABasicBlock> {
     return isFakeRoot;
   }
   
+  public void setNodeId(int id) {
+    nodeId = id;
+  }
+  
+  public int getNodeId() {
+    return nodeId;
+  }
+  
   public String toString() {
     
+    /*
     if (this.isFakeRoot()) {
       return "FakeRoot";
     }
     
     BasicBlockInContext<T> firstBB = getFirstBasicBlock();
     
-    /*
-    try {
-      String firstInst = firstBB.getFirstInstruction().toString();
-      return "FirstInst[" + firstInst + "]";
-    } catch(ArrayIndexOutOfBoundsException ex) {
-      String firstInst = "No Instruction";
-      return "FirstInst[" + firstInst + "]";
-    } catch (NullPointerException ex) {
-      String firstInst = "Null Instruction";
-      return "FirstInst[" + firstInst + "]";
-    }
-    */
     return "Leader[SSA index:" + firstBB.getFirstInstructionIndex() + "]" + " - "
         + firstBB.getMethod().getSignature();
+    */
+    
+    if (this.isFakeRoot()) {
+      return "0-F";
+    }
+    
+    return (nodeId) + "-" + (isLogged? "T":"F");
   }
 
 }

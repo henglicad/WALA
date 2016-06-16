@@ -97,6 +97,7 @@ public class AggregatedCFG<T extends ISSABasicBlock> {
       if (isLeader.get(orig.getNumber(bb))) {
         AggregatedBasicBlockInContext<T> abb = new AggregatedBasicBlockInContext<T>();
         aggg.addNode(abb);
+        abb.setNodeId(aggg.getNumber(abb) + 1);
         abb.addBasicBlock(bb);
         bb2abb.put(orig.getNumber(bb), aggg.getNumber(abb));
         if (orig.getSuccNodes(bb).hasNext()) {
@@ -118,6 +119,7 @@ public class AggregatedCFG<T extends ISSABasicBlock> {
      */
     AggregatedBasicBlockInContext<T> _fakeRoot = new AggregatedBasicBlockInContext<T>();
     _fakeRoot.setIsFakeRoot(true);
+    _fakeRoot.setNodeId(0);
     setFakeRoot(_fakeRoot);
     aggg.addNode(_fakeRoot);
   }
