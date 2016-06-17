@@ -23,7 +23,8 @@ import com.ibm.wala.ssa.ISSABasicBlock;
 
 public class AggregatedBasicBlockInContext<T extends ISSABasicBlock> {
   ArrayList<BasicBlockInContext<T>> abb;
-  boolean isLogged = false;
+  boolean isLogged = false; // a block is logged
+  //boolean isVisible = false; // a block is not logged but its execution is determined by logs in other blocks
   boolean isFakeRoot = false;
   int nodeId = -1000; // unique id in a CFG; -10000 indicate the node id is not set 
   
@@ -68,7 +69,15 @@ public class AggregatedBasicBlockInContext<T extends ISSABasicBlock> {
   public boolean getIsLogged() {
     return isLogged;
   }
+  /*
+  public void setIsVisible(boolean isVisibleOrNot) {
+    isVisible = isVisibleOrNot;
+  }
   
+  public boolean getIsVisible() {
+    return isVisible;
+  }
+  */
   public void setIsFakeRoot(boolean isFakeRootOrNot) {
     isFakeRoot = isFakeRootOrNot;
   }

@@ -173,4 +173,16 @@ public class AggregatedCFG<T extends ISSABasicBlock> {
   public AggregatedBasicBlockInContext<T> getFakeRoot() {
     return fakeRoot;
   }
+  /*
+  public void populateVisibleNodes() {
+    for (Iterator<AggregatedBasicBlockInContext<T>> abbs = aggg.iterator(); abbs.hasNext();) {
+      AggregatedBasicBlockInContext<T> abb = abbs.next();
+      if (abb.isFakeRoot()) continue;
+      if (abb.getIsLogged() && aggg.getPredNodeCount(abb) == 1) {
+        //AggregatedBasicBlockInContext<T> pred
+        
+      }
+    }
+  }
+  */
 }
