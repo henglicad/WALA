@@ -10,24 +10,16 @@
  *******************************************************************************/
 package com.ibm.wala.ipa.cfg;
 
-import com.ibm.wala.ipa.cha.ClassHierarchy;
-import com.ibm.wala.ipa.cha.IClassHierarchy;
 import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.IMethod;
-import com.ibm.wala.ipa.callgraph.AnalysisOptions;
 import com.ibm.wala.ipa.callgraph.AnalysisScope;
-import com.ibm.wala.types.ClassLoaderReference;
-import java.util.jar.JarFile;
-import java.io.IOException;
+import com.ibm.wala.ipa.cha.ClassHierarchy;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
+import com.ibm.wala.ipa.cha.IClassHierarchy;
+import com.ibm.wala.types.ClassLoaderReference;
 
 public class IntraproceduralCFGs {
-
-  public static void main(String[] args) {
-    // TODO Auto-generated method stub
-
-  }
-  
+    
   public void getAllMethods(AnalysisScope  scope) throws ClassHierarchyException {
     IClassHierarchy cha = ClassHierarchy.make(scope);
     for (IClass cl : cha) {
@@ -38,5 +30,7 @@ public class IntraproceduralCFGs {
       }
     }
   }
+  
+  
 
 }
