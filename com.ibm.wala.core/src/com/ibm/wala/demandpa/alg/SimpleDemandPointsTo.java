@@ -101,7 +101,7 @@ public class SimpleDemandPointsTo extends AbstractDemandPointsTo {
     };
 
     SlowDFSDiscoverTimeIterator<Object> dfs = new SlowDFSDiscoverTimeIterator<Object>(g, pk);
-    return Predicate.filter(dfs, iKeyFilter);
+    return (Collection<InstanceKey>) Predicate.filter(dfs, iKeyFilter);
   }
 
 }
