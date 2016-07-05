@@ -16,7 +16,7 @@ import com.ibm.wala.util.io.FileProvider;
 import com.ibm.wala.util.io.FileUtil;
 import com.ibm.wala.ipa.cfg.IntraproceduralCFGs;
 
-public class IntroproceduralCFGsTest {
+public class IntraproceduralCFGsTest {
 
   public static String REGRESSION_EXCLUSIONS = "Java60RegressionExclusions.txt";
 
@@ -36,7 +36,8 @@ public class IntroproceduralCFGsTest {
     
     AnalysisScope scope = buildAnalysisScope(appJar, scopeFile, exclusionFile);
     
-    IntraproceduralCFGs introCFGs = new IntraproceduralCFGs();
+    IntraproceduralCFGs introCFGs = new IntraproceduralCFGs(scope);
+    introCFGs.printAllMethods();
   }
   
   public static AnalysisScope buildAnalysisScope(String appJar, String scopeFile, String exclusionFile) throws IOException {
